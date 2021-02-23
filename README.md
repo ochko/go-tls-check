@@ -4,8 +4,28 @@
 ```sh
 go install github.com/ochko/go-tls-check/cmd/tls-check
 
-tls-check example.com your.site.com
-tls-check -w 24h -t 5s example.com your.site.com
+tls-check example.com
+tls-check -w 24h -t 5s example.com
+```
+
+Exit code is `0` when validation was successful, `1` if there is any issue.
+It also prints some information in json format, so that you can collect expiration days of your deployed certificates:
+```json
+{
+  "status": "ok",
+  "certificateCheckHost": "example.com",
+  "expirationDays": 305,
+  "msg":"valid certificate"
+}
+```
+When there is an issue:
+```json
+{
+  "status": "ng",
+  "certificateCheckHost":"unknown.com",
+  "expirationDays":0,
+  "msg":"dial tcp 23.253.58.227:443: i/o timeout"
+}
 ```
 
 #### Options
