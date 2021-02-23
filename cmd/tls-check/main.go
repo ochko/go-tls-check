@@ -27,7 +27,7 @@ func main() {
 	connTimeout, errParse2 := time.ParseDuration(connTimeoutStr)
 
 	if len(hostnames) == 0 || errParse1 != nil || errParse2 != nil {
-		fmt.Println("Usage:\ntls-cert-check [options] hostname1 hostname2 ...\n  options:")
+		fmt.Println("Usage:\ntls-check [options] hostname1 hostname2 ...\n  options:")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
