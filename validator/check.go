@@ -8,12 +8,10 @@ import (
 	"time"
 )
 
-const AlertWindow = time.Hour * 24 * 14 // 14 days
-const DialerTimeout = time.Second * 10
 const TimeFormat = "2006-01-02 15PM MST"
 
-func Check(name string) (exp time.Duration, err error) {
-	dialer := &net.Dialer{Timeout: DialerTimeout}
+func Check(name string, alertWindow time.Duration, connTimeout time.Duration) (exp time.Duration, err error) {
+	dialer := &net.Dialer{Timeout: connTimeout}
 	conn, err := tls.DialWithDialer(dialer, "tcp", name+":443", nil)
 	if err != nil {
 		return
@@ -37,7 +35,7 @@ func Check(name string) (exp time.Duration, err error) {
 			exp = sub
 		}
 
-		if exp < AlertWindow {
+		if exp < alertWindow {
 			err = errors.New(fmt.Sprintf("expires at %v", c.NotAfter.Format(TimeFormat)))
 			break
 		}
