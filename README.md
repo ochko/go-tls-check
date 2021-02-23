@@ -9,7 +9,7 @@ tls-check -w 24h -t 5s example.com your.site.com
 ```
 
 #### Options
-```sh
+```
 tls-cert-check [options] hostname1 hostname2 ...
   options:
   -t string
