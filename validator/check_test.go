@@ -12,11 +12,8 @@ var (
 )
 
 func TestCheckUnknownHost(t *testing.T) {
-	window, _ = time.ParseDuration("72h")
-	timeout, _ = time.ParseDuration("10s")
-
 	host := "unknown.no-such-domain.com"
-	exp, err := Check(host, window, timeout)
+	exp, err := Check(host, time.Hour*24, time.Second*3)
 	if err == nil {
 		t.Errorf("Check(%s) succeeded, want error", host)
 	}
@@ -26,11 +23,8 @@ func TestCheckUnknownHost(t *testing.T) {
 }
 
 func TestExpireSoon(t *testing.T) {
-	window, _ = time.ParseDuration("876582h")
-	timeout, _ = time.ParseDuration("10s")
-
 	host := "example.com"
-	exp, err := Check(host, window, timeout)
+	exp, err := Check(host, time.Hour*876582, time.Second*10)
 	if err == nil {
 		t.Errorf("Check(%s) succeeded, want error", host)
 	}
@@ -43,11 +37,8 @@ func TestExpireSoon(t *testing.T) {
 }
 
 func TestValid(t *testing.T) {
-	window, _ = time.ParseDuration("72h")
-	timeout, _ = time.ParseDuration("10s")
-
 	host := "example.com"
-	exp, err := Check(host, window, timeout)
+	exp, err := Check(host, time.Hour*24, time.Second*10)
 	if err != nil {
 		t.Errorf("Check(%s) failed with %v, want success", host, err)
 	}
