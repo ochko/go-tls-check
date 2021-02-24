@@ -10,8 +10,6 @@ import (
 	"github.com/ochko/go-tls-check/validator"
 )
 
-const LogFormat = "{\"status\":\"%s\",\"certificateCheckHost\":\"%s\",\"expirationDays\":%d,\"msg\":\"%v\"}"
-
 func main() {
 	var (
 		alertWindowStr string
@@ -23,13 +21,18 @@ func main() {
 	flag.Parse()
 
 	hostnames := flag.Args()
-	alertWindow, errParse1 := time.ParseDuration(alertWindowStr)
-	connTimeout, errParse2 := time.ParseDuration(connTimeoutStr)
+	if len(hostnames) == 0 {
+		exit()
+	}
 
-	if len(hostnames) == 0 || errParse1 != nil || errParse2 != nil {
-		fmt.Println("Usage:\ntls-check [options] hostname1 hostname2 ...\n  options:")
-		flag.PrintDefaults()
-		os.Exit(1)
+	alertWindow, err := time.ParseDuration(alertWindowStr)
+	if err != nil {
+		exit()
+	}
+
+	connTimeout, err := time.ParseDuration(connTimeoutStr)
+	if err != nil {
+		exit()
 	}
 
 	status := 0
@@ -37,15 +40,31 @@ func main() {
 
 	for _, name := range hostnames {
 		exp, err := validator.Check(name, alertWindow, connTimeout)
-		expirationDays := int64(exp.Hours() / 24)
 
 		if err != nil {
 			status = 1
-			l.Printf(LogFormat, "ng", name, expirationDays, err)
+			report(l, "ng", name, exp, err.Error())
 		} else {
-			l.Printf(LogFormat, "ok", name, expirationDays, "valid certificate")
+			report(l, "ok", name, exp, "valid certificate")
 		}
 	}
 
 	os.Exit(status)
+}
+
+const LogFormat = `{` +
+	`"status":"%s",` +
+	`"certificateCheckHost":"%s",` +
+	`"expirationDays":%d,` +
+	`"msg":"%s"}`
+
+func report(l *log.Logger, state string, name string, exp time.Duration, msg string) {
+	days := int64(exp.Hours() / 24)
+	l.Printf(LogFormat, state, name, days, msg)
+}
+
+func exit() {
+	fmt.Println("Usage:\ntls-check [options] hostname1 hostname2 ...\n  options:")
+	flag.PrintDefaults()
+	os.Exit(1)
 }
