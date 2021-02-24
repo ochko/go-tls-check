@@ -55,7 +55,7 @@ expirationDays, err := validator.Check("example.com", time.Hour*24, time.Second*
 
 ```sh
 docker build . -t tls-check
-docker run -ti --rm tls-check example.com
+docker run tls-check example.com
 ```
 
 ### License
