@@ -13,11 +13,13 @@ import (
 var (
 	alertWindowStr string
 	connTimeoutStr string
+	quietMode      bool
 )
 
 func init() {
 	flag.StringVar(&alertWindowStr, "w", "72h", "Allowd time before certificate expiration.")
 	flag.StringVar(&connTimeoutStr, "t", "10s", "Connection timeout.")
+	flag.BoolVar(&quietMode, "q", false, "Quiet mode, no output unless validation fails.")
 }
 
 func main() {
@@ -43,7 +45,9 @@ func main() {
 
 	for _, name := range hostnames {
 		cert := validator.NewCert(name, alertWindow, connTimeout)
-		l.Print(cert)
+		if !quietMode {
+			l.Print(cert)
+		}
 		if cert.Invalid() {
 			exitCode = 1
 		}
