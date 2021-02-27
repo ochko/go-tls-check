@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-var (
-	window, timeout time.Duration
-	_               error
-)
-
 func TestCheckUnknownHost(t *testing.T) {
 	host := "unknown.no-such-domain.com"
 	exp, err := Check(host, time.Hour*24, time.Second*3)
