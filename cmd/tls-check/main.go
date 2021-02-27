@@ -10,47 +10,51 @@ import (
 	"github.com/ochko/go-tls-check/validator"
 )
 
-func main() {
-	var (
-		alertWindowStr string
-		connTimeoutStr string
-	)
+var (
+	alertWindowStr string
+	connTimeoutStr string
+)
 
+func init() {
 	flag.StringVar(&alertWindowStr, "w", "72h", "Allowd time before certificate expiration.")
 	flag.StringVar(&connTimeoutStr, "t", "10s", "Connection timeout.")
+}
+
+func main() {
 	flag.Parse()
 
 	hostnames := flag.Args()
 	if len(hostnames) == 0 {
-		exit()
+		exit("No hostname is given.")
 	}
 
 	alertWindow, err := time.ParseDuration(alertWindowStr)
 	if err != nil {
-		exit()
+		exit("Invalid value for option -w.")
 	}
 
 	connTimeout, err := time.ParseDuration(connTimeoutStr)
 	if err != nil {
-		exit()
+		exit("Invalid value for option -t.")
 	}
 
-	status := 0
+	exitCode := 0
 	l := log.New(os.Stdout, "", 0)
 
 	for _, name := range hostnames {
 		cert := validator.NewCert(name, alertWindow, connTimeout)
 		l.Print(cert)
 		if cert.Invalid() {
-			status = 1
+			exitCode = 1
 		}
 	}
 
-	os.Exit(status)
+	os.Exit(exitCode)
 }
 
-func exit() {
-	fmt.Println("Usage:\ntls-check [options] hostname1 hostname2 ...\n  options:")
+func exit(msg string) {
+	fmt.Println(msg, "Usage:")
+	fmt.Println("tls-check [options] hostname1 hostname2 ...\n  options:")
 	flag.PrintDefaults()
-	os.Exit(1)
+	os.Exit(2)
 }
