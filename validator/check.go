@@ -10,6 +10,11 @@ import (
 
 const TimeFormat = "2006-01-02 15PM MST"
 
+func NewCert(name string, alertWindow time.Duration, connTimeout time.Duration) Cert {
+	exp, err := Check(name, alertWindow, connTimeout)
+	return Cert{name, exp, err}
+}
+
 func Check(name string, alertWindow time.Duration, connTimeout time.Duration) (exp time.Duration, err error) {
 	dialer := &net.Dialer{Timeout: connTimeout}
 	conn, err := tls.DialWithDialer(dialer, "tcp", name+":443", nil)

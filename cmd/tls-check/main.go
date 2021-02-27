@@ -39,28 +39,14 @@ func main() {
 	l := log.New(os.Stdout, "", 0)
 
 	for _, name := range hostnames {
-		exp, err := validator.Check(name, alertWindow, connTimeout)
-
-		if err != nil {
+		cert := validator.NewCert(name, alertWindow, connTimeout)
+		l.Print(cert)
+		if cert.Invalid() {
 			status = 1
-			report(l, "ng", name, exp, err.Error())
-		} else {
-			report(l, "ok", name, exp, "valid certificate")
 		}
 	}
 
 	os.Exit(status)
-}
-
-const LogFormat = `{` +
-	`"status":"%s",` +
-	`"certificateCheckHost":"%s",` +
-	`"expirationDays":%d,` +
-	`"msg":"%s"}`
-
-func report(l *log.Logger, state string, name string, exp time.Duration, msg string) {
-	days := int64(exp.Hours() / 24)
-	l.Printf(LogFormat, state, name, days, msg)
 }
 
 func exit() {
