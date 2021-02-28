@@ -11,41 +11,36 @@ import (
 )
 
 var (
-	alertWindowStr string
-	connTimeoutStr string
-	quietMode      bool
+	fs          *flag.FlagSet
+	quiet       bool
+	alertWindow time.Duration
+	connTimeout time.Duration
 )
 
 func init() {
-	flag.StringVar(&alertWindowStr, "w", "72h", "Allowd time before certificate expiration.")
-	flag.StringVar(&connTimeoutStr, "t", "10s", "Connection timeout.")
-	flag.BoolVar(&quietMode, "q", false, "Quiet mode, no output unless validation fails.")
+	fs = flag.NewFlagSet("tls-check", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [flags] hostname [hostname2 ...]\n", fs.Name())
+		fs.PrintDefaults()
+	}
+
+	fs.DurationVar(&alertWindow, "w", time.Hour*72, "Allowd time before certificate expiration.")
+	fs.DurationVar(&connTimeout, "t", time.Second*10, "Connection timeout.")
+	fs.BoolVar(&quiet, "q", false, "Quiet mode, no output unless validation fails.")
+	fs.Parse(os.Args[1:])
+	if len(fs.Args()) == 0 {
+		fs.Usage()
+		os.Exit(2)
+	}
 }
 
 func main() {
-	flag.Parse()
-
-	hostnames := flag.Args()
-	if len(hostnames) == 0 {
-		exit("No hostname is given.")
-	}
-
-	alertWindow, err := time.ParseDuration(alertWindowStr)
-	if err != nil {
-		exit("Invalid value for option -w.")
-	}
-
-	connTimeout, err := time.ParseDuration(connTimeoutStr)
-	if err != nil {
-		exit("Invalid value for option -t.")
-	}
-
 	exitCode := 0
 	l := log.New(os.Stdout, "", 0)
 
-	for _, name := range hostnames {
+	for _, name := range fs.Args() {
 		cert := validator.NewCert(name, alertWindow, connTimeout)
-		if !quietMode {
+		if !quiet {
 			l.Print(cert)
 		}
 		if cert.Invalid() {
@@ -54,11 +49,4 @@ func main() {
 	}
 
 	os.Exit(exitCode)
-}
-
-func exit(msg string) {
-	fmt.Println(msg, "Usage:")
-	fmt.Println("tls-check [options] hostname1 hostname2 ...\n  options:")
-	flag.PrintDefaults()
-	os.Exit(2)
 }
