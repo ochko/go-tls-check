@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -36,12 +35,11 @@ func init() {
 
 func main() {
 	exitCode := 0
-	l := log.New(os.Stdout, "", 0)
 
 	for _, name := range fs.Args() {
 		cert := validator.NewCert(name, alertWindow, connTimeout)
 		if !quiet {
-			l.Print(cert)
+			fmt.Println(cert)
 		}
 		if cert.Invalid() {
 			exitCode = 1
