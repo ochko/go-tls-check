@@ -13,17 +13,16 @@ It also prints some information in json format, so that you can collect expirati
 ```json
 {
   "status": "ok",
-  "certificateCheckHost": "example.com",
-  "expirationDays": 305,
-  "msg":"valid certificate"
+  "host": "example.com",
+  "expiration": "32h1m52s",
 }
 ```
 When there is an issue:
 ```json
 {
   "status": "ng",
-  "certificateCheckHost":"unknown.com",
-  "expirationDays":0,
+  "host":"unknown.com",
+  "expiration":"0s",
   "msg":"dial tcp 23.253.58.227:443: i/o timeout"
 }
 ```
@@ -45,7 +44,7 @@ import "github.com/ochko/go-tls-check/validator"
 
 ...
 
-expirationDays, err := validator.Check("example.com", time.Hour*24, time.Second*3)
+expiration, err := validator.Check("example.com", time.Hour*24, time.Second*3)
 
 ...
 
