@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -11,19 +12,23 @@ type Cert struct {
 	err  error
 }
 
-const logFormat = `{` +
-	`"status":"%s",` +
-	`"certificateCheckHost":"%s",` +
-	`"expirationDays":%d,` +
-	`"msg":"%s"}`
-
 func (c Cert) String() string {
-	days := int64(c.exp.Hours() / 24)
-	if c.err != nil {
-		return fmt.Sprintf(logFormat, "ng", c.name, days, c.err.Error())
-	} else {
-		return fmt.Sprintf(logFormat, "ok", c.name, days, "valid certificate")
+	s := map[string]string{
+		"host":       c.name,
+		"expiration": c.exp.String(),
+		"status":     "ok",
 	}
+
+	if c.err != nil {
+		s["status"] = "ng"
+		s["msg"] = c.err.Error()
+	}
+
+	b, err := json.Marshal(s)
+	if err != nil {
+		return fmt.Sprintf("%v", s)
+	}
+	return string(b)
 }
 
 func (c Cert) Invalid() bool {

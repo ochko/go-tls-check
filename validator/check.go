@@ -12,7 +12,7 @@ const TimeFormat = "2006-01-02 15PM MST"
 
 func NewCert(name string, alertWindow time.Duration, connTimeout time.Duration) Cert {
 	exp, err := Check(name, alertWindow, connTimeout)
-	return Cert{name, exp, err}
+	return Cert{name: name, exp: exp, err: err}
 }
 
 func Check(name string, alertWindow time.Duration, connTimeout time.Duration) (exp time.Duration, err error) {
